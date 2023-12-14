@@ -1,0 +1,4 @@
+python==3.8.5
+pytest==7.4.1
+requests==2.26.0
+jsonpath==0.82
