@@ -1,4 +1,5 @@
 import json
+import os
 import pytest
 from config.base_urls import BASE_URLS
 from config.endpoints import ENDPOINTS
@@ -6,15 +7,17 @@ from helpers.api_helpers import ApiHelpers
 
 @pytest.fixture
 def api(request):
-    environment = request.config.getoption("--env") or 'development'
+    environment = os.environ.get("ENVIRONMENT", "development")
     return ApiHelpers(environment)
 
-@pytest.mark.parametrize("user_id, expected_name", [(2, "Janet"), (3, "John")])
+@pytest.mark.parametrize("user_id, expected_name", [(2, "Janet"), (3, "John")], ids=["User ID 2", "User ID 3"])
 def test_fetch_user(api, user_id, expected_name):
     endpoint = ENDPOINTS['users']
     response_json = api.get_request(endpoint)
     assert response_json["data"]["first_name"] == expected_name
     assert response_json["data"]["id"] == user_id
+
+
 
 def test_create_user(api):
     endpoint = ENDPOINTS['users']
@@ -57,6 +60,6 @@ def test_delete_user(api):
     user_id_to_delete = 4  # Assuming there is an existing user with ID 4
     endpoint = ENDPOINTS['users'] + str(user_id_to_delete)
     response_status_code = api.delete_request(endpoint)
-    assert response_status_code == 204  # Assuming successful deletion
+    assert response_status_code == 204  # Assuming successful deletion 
 
 # Add more test functions as needed for other endpoints and scenarios

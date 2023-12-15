@@ -14,31 +14,37 @@ class ApiHelpers:
     def get_request(self, endpoint):
         headers = self._build_headers()
         response = requests.get(url=self.base_url + endpoint, headers=headers)
+        assert response.status_code == 200, f"GET request failed with status code {response.status_code}"
         return json.loads(response.text)
 
     def post_request(self, endpoint, data):
         headers = self._build_headers()
         response = requests.post(url=self.base_url + endpoint, json=data, headers=headers)
+        assert response.status_code == 201, f"POST request failed with status code {response.status_code}"
         return json.loads(response.text)
 
     def put_request(self, endpoint, data):
         headers = self._build_headers()
         response = requests.put(url=self.base_url + endpoint, json=data, headers=headers)
+        assert response.status_code == 200, f"PUT request failed with status code {response.status_code}"
         return json.loads(response.text)
 
     def patch_request(self, endpoint, data):
         headers = self._build_headers()
         response = requests.patch(url=self.base_url + endpoint, json=data, headers=headers)
+        assert response.status_code == 200, f"PATCH request failed with status code {response.status_code}"
         return json.loads(response.text)
 
     def delete_request(self, endpoint):
         headers = self._build_headers()
         response = requests.delete(url=self.base_url + endpoint, headers=headers)
+        assert response.status_code == 204, f"DELETE request failed with status code {response.status_code}"
         return response.status_code
 
     def _build_headers(self):
         headers = {'Content-Type': 'application/json'}
         if self.auth_token:
-            headers['Authorization'] = f'Bearer {self.auth_token}'
-        headers.update(self.custom_headers)
+          headers['Authorization'] = f'Bearer {self.auth_token}'
+        if self.custom_headers:
+          headers.update(self.custom_headers)
         return headers
