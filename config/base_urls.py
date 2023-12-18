@@ -1,6 +1,6 @@
 # config/base_urls.py
 BASE_URLS = {
-    'development': 'https://dev.example.com/',
+    'development': 'https://reqres.in/',
     'testing': 'https://test.example.com/',
     'production': 'https://api.example.com/',
 }
