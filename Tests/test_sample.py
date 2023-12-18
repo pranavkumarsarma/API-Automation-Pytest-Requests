@@ -20,13 +20,11 @@ def test_fetch_user(api, user_id, expected_name):
     endpoint = ENDPOINTS['users']
     response_json = api.get_request(endpoint)
     print(response_json)
-        # Check if 'data' key exists in the response
+    # Check if 'data' key exists in the response
     assert 'data' in response_json, "Response does not contain 'data' key"
-
     # Assume each item in the list has an "id" field
     users = response_json['data']
     user = next((user for user in users if user.get("id") == user_id), None)
-
     # Assert if the user is found and has the expected name
     assert user is not None, f"User with ID {user_id} not found in the response"
     assert user.get("first_name") == expected_name
@@ -35,7 +33,6 @@ def test_fetch_user(api, user_id, expected_name):
 def test_create_user(api, user_data_file):
     endpoint = ENDPOINTS['users']
     user_data = load_user_data(user_data_file)
-    
     response_json = api.post_request(endpoint, user_data)
     print(response_json)
     assert response_json["name"] is not None
@@ -43,29 +40,39 @@ def test_create_user(api, user_data_file):
     assert response_json["createdAt"] is not None
     assert response_json["job"] == user_data["job"]
 
-# def test_update_user(api):
-#     user_id = 1  # Assuming there is an existing user with ID 1
-#     endpoint = ENDPOINTS['users'] + str(user_id)
-#     updated_data = {
-#         "first_name": "Updated",
-#         "last_name": "User",
-#         "email": "updated.user@example.com"
-#     }
-#     response_json = api.put_request(endpoint, updated_data)
-#     assert response_json["data"]["id"] == user_id
-#     assert response_json["data"]["first_name"] == "Updated"
-#     assert response_json["data"]["last_name"] == "User"
-#     assert response_json["data"]["email"] == "updated.user@example.com"
 
-# def test_partial_update_user(api):
-#     user_id = 1  # Assuming there is an existing user with ID 1
-#     endpoint = ENDPOINTS['users'] + str(user_id)
-#     partial_data = {
-#         "last_name": "UpdatedLastName"
-#     }
-#     response_json = api.patch_request(endpoint, partial_data)
-#     assert response_json["data"]["id"] == user_id
-#     assert response_json["data"]["last_name"] == "UpdatedLastName"
+@pytest.mark.parametrize("user_data_file", ["TestData/user1.json", "TestData/user2.json"])
+def test_update_user(api, user_data_file):
+    user_id_to_update = 1  # Assuming there is an existing user with ID 1
+    endpoint = f"{ENDPOINTS['users']}/{user_id_to_update}"
+    
+    user_data = load_user_data(user_data_file)
+    
+    # Perform a PUT request to update the user
+    response_json = api.put_request(endpoint, user_data)
+    
+    print(response_json)
+    assert response_json["name"] is not None
+    assert response_json["id"] == user_id_to_update
+    assert response_json["updatedAt"] is not None
+    assert response_json["job"] == user_data["job"]
+
+@pytest.mark.parametrize("user_data_file", ["TestData/user1.json", "TestData/user2.json"])
+def test_patch_user(api, user_data_file):
+    user_id_to_patch = 1  # Assuming there is an existing user with ID 1
+    endpoint = f"{ENDPOINTS['users']}/{user_id_to_patch}"
+    
+    user_data = load_user_data(user_data_file)
+    
+    # Perform a PATCH request to update the user
+    response_json = api.patch_request(endpoint, user_data)
+    
+    print(response_json)
+    assert response_json["name"] is not None
+    assert response_json["id"] == user_id_to_patch
+    assert response_json["updatedAt"] is not None
+    assert response_json["job"] == user_data["job"]
+
 
 @pytest.mark.parametrize("user_id_to_delete", [4, 5, 6])
 def test_delete_user(api, user_id_to_delete):
