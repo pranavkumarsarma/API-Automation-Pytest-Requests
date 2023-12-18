@@ -10,6 +10,11 @@ def api(request):
     environment = os.environ.get("ENVIRONMENT", "development")
     return ApiHelpers(environment)
 
+def load_user_data(file_path):
+    with open(file_path, "r") as file:
+        user_data = json.load(file)
+    return user_data
+
 @pytest.mark.parametrize("user_id, expected_name", [(2, "Janet"), (3, "Emma")], ids=["User ID 2", "User ID 3"])
 def test_fetch_user(api, user_id, expected_name):
     endpoint = ENDPOINTS['users']
@@ -26,18 +31,17 @@ def test_fetch_user(api, user_id, expected_name):
     assert user is not None, f"User with ID {user_id} not found in the response"
     assert user.get("first_name") == expected_name
 
-# def test_create_user(api):
-#     endpoint = ENDPOINTS['users']
-#     user_data = {
-#         "first_name": "New",
-#         "last_name": "User",
-#         "email": "new.user@example.com"
-#     }
-#     response_json = api.post_request(endpoint, user_data)
-#     assert response_json["data"]["id"] is not None
-#     assert response_json["data"]["first_name"] == "New"
-#     assert response_json["data"]["last_name"] == "User"
-#     assert response_json["data"]["email"] == "new.user@example.com"
+@pytest.mark.parametrize("user_data_file", ["TestData/user1.json", "TestData/user2.json"])
+def test_create_user(api, user_data_file):
+    endpoint = ENDPOINTS['users']
+    user_data = load_user_data(user_data_file)
+    
+    response_json = api.post_request(endpoint, user_data)
+    print(response_json)
+    assert response_json["name"] is not None
+    assert response_json["id"] is not None
+    assert response_json["createdAt"] is not None
+    assert response_json["job"] == user_data["job"]
 
 # def test_update_user(api):
 #     user_id = 1  # Assuming there is an existing user with ID 1
@@ -63,10 +67,11 @@ def test_fetch_user(api, user_id, expected_name):
 #     assert response_json["data"]["id"] == user_id
 #     assert response_json["data"]["last_name"] == "UpdatedLastName"
 
-# def test_delete_user(api):
-#     user_id_to_delete = 4  # Assuming there is an existing user with ID 4
-#     endpoint = ENDPOINTS['users'] + str(user_id_to_delete)
-#     response_status_code = api.delete_request(endpoint)
-#     assert response_status_code == 204  # Assuming successful deletion 
+@pytest.mark.parametrize("user_id_to_delete", [4, 5, 6])
+def test_delete_user(api, user_id_to_delete):
+    endpoint = ENDPOINTS['users'] + str(user_id_to_delete)
+    response_status_code = api.delete_request(endpoint)
+    assert response_status_code == 204  # Assuming successful deletion, double verification
+
 
 # Add more test functions as needed for other endpoints and scenarios

@@ -29,7 +29,14 @@ class ApiHelpers:
        # response = requests.post(url=self.base_url + endpoint, json=data, headers=headers)
         response = requests.post(url=self.base_url + endpoint, json=data)
         assert response.status_code == 201, f"POST request failed with status code {response.status_code}"
-        return json.loads(response.text)
+        try:
+            # Try to parse the response as JSON
+            response_json = response.json()
+        except json.JSONDecodeError:
+            # If parsing fails, assume it's not JSON and return None
+            return None
+
+        return response_json
 
     def put_request(self, endpoint, data):
         # headers = self._build_headers()
